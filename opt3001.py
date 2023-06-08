@@ -79,18 +79,6 @@ class OPT3001:
 
     @property
     def limit_high(self) -> int:
-        # self.read_u16(_HIGH_LIMIT)
-
-        # exponent = (self.buf[0] >> 4) & ((1 << 4) - 1)  # E[3:0]
-        # fractional_result = (self.buf[0]) & ((1 << 4) - 1)  # R[11:8]
-        # fractional_result = fractional_result << 8  # pad in order to add the rest of the mantissa
-        # fractional_result += self.buf[1]  # R[7:0]
-
-        # # Formulas used below are from opt3001 datasheet
-        # lsb_size = 0.01 * (2 ** exponent)
-        # high_limit = lsb_size * fractional_result
-
-        # return high_limit
         return self.high_limit
 
     @property
@@ -98,21 +86,19 @@ class OPT3001:
         return self.low_limit
 
     @limit_high.setter
-    def upper_comparison_limit(self, limit: int) -> None:
+    def limit_high(self, limit: int) -> None:
         """
         will set the High-limit register to the value requested. Will modify
-        bits 0-11 only. Bits 15-12 will be the range number. limit can be up
+        bits 0-11 only. Bits 15-12 will be the range number. limit can be 0 up
         to 4095, for anything greater the 12 LSBs will be kept.
         """
-        # self.buf[0] = _HIGH_LIMIT
-        # limit = limit & (1 << 12) - 1
-        # self.buf[1] = (self.range_number << 4) + (limit >> 8)
-        # self.buf[2] = limit & ((1 << 8) - 1)
-
-        # with self.i2c_device as i2c:
-        #     i2c.write(self.buf)
         self.high_limit = limit & ((1 << 12) - 1)
 
     @limit_low.setter
-    def lower_comparison_limit(self, limit: int) -> None:
+    def limit_low(self, limit: int) -> None:
+        """
+        will set the Low-Limit register to the value input by the caller. Will
+        only modify bits 11-0. the limit can be from 0-4095. only the 12 LSBs
+        will be kept of any limit value. 
+        """
         self.low_limit = limit & ((1 << 12) - 1)
