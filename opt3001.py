@@ -99,6 +99,6 @@ class OPT3001:
         """
         will set the Low-Limit register to the value input by the caller. Will
         only modify bits 11-0. the limit can be from 0-4095. only the 12 LSBs
-        will be kept of any limit value. 
+        will be kept of any limit value.
         """
         self.low_limit = limit & ((1 << 12) - 1)
