@@ -2,12 +2,16 @@
 CircuitPython driver for the OPT3001 ambient light sensor
 M. Holliday
 T. Damiani
+====================
 
-     GND  3V3  SDA  SCL
-ADDR 0x44 0x45 0x46 0x47
+**SOFTWARE DEPENDENCIES**
 
-from opt3001 import OPT3001
-s = OPT3001(cubesat.i2c1, 0x45)
+* adafruit Circuit Python firmware (8.1+)
+    https://github.com/adafruit/circuitpython/releases
+* adafruit bus device library
+    https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
+* adafruit register library
+    https://github.com/adafruit/Adafruit_CircuitPython_Register
 """
 
 from micropython import const
@@ -15,10 +19,11 @@ from adafruit_bus_device.i2c_device import I2CDevice
 from adafruit_register.i2c_bits import RWBits
 from adafruit_register.i2c_bit import ROBit, RWBit
 
-_RESULT = const(0x00)
-_CONFIGURATION = const(0x01)
-_LOW_LIMIT = const(0x02)
-_HIGH_LIMIT = const(0x03)
+_RESULT         = const(0x00)
+_CONFIGURATION  = const(0x01)
+_LOW_LIMIT      = const(0x02)
+_HIGH_LIMIT     = const(0x03)
+
 
 class OPT3001:
     """OPT3001 Sun Sensor Driver"""
@@ -26,17 +31,18 @@ class OPT3001:
     # RWBits(num_bits, register_address, lowest_bit, register_width=1, lsb_first=True)
 
     # See Table 10 in datasheet for Configuration Register settings
-    mode         = RWBits(2, _CONFIGURATION, 9, register_width=2, lsb_first=False)
-    range_number = RWBits(4, _CONFIGURATION, 12, register_width=2, lsb_first=False)
-    conv_800ms   = RWBit(_CONFIGURATION, 11, register_width=2, lsb_first=False)
-    rdy   = ROBit(_CONFIGURATION, 7, register_width=2, lsb_first=False)
-    high_limit = RWBits(12, _HIGH_LIMIT, 0, register_width=2, lsb_first=False)
-    low_limit = RWBits(12, _LOW_LIMIT, 0, register_width=2, lsb_first=False)
+    range_number    = RWBits(4, _CONFIGURATION, 12, register_width=2, lsb_first=False)
+    conv_800ms      = RWBit(_CONFIGURATION, 11, register_width=2, lsb_first=False)
+    mode            = RWBits(2, _CONFIGURATION, 9, register_width=2, lsb_first=False)
+    rdy             = ROBit(_CONFIGURATION, 7, register_width=2, lsb_first=False)
+    high_limit      = RWBits(12, _HIGH_LIMIT, 0, register_width=2, lsb_first=False)
+    low_limit       = RWBits(12, _LOW_LIMIT, 0, register_width=2, lsb_first=False)
 
     def __init__(self, i2c_bus, address=0x44):
         """Initialize and Configure the Light Sensor Driver"""
         self.i2c_device = I2CDevice(i2c_bus, address)
         # Initialize a fixed buffer to read and write from
+        # 1 byte for the address register, 2 bytes for limit register
         self.buf = bytearray(3)
 
         self.read_u16(0x7F)  # DEVICE_ID
